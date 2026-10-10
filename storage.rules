@@ -1,0 +1,63 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Default deny all unmatched paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isBootstrappedAdmin() {
+      return isSignedIn() && request.auth.token.email == 'utkarsh0srivastav@gmail.com';
+    }
+
+    function isApprovedOwner() {
+      return isSignedIn() &&
+        firestore.exists(/databases/(default)/documents/owners/$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/owners/$(request.auth.uid)).data.accountStatus == 'Approved';
+    }
+
+    function isPgOwner(pgId) {
+      return isApprovedOwner() && (
+        pgId == 'pg_' + request.auth.uid + '_init' ||
+        (
+          firestore.exists(/databases/(default)/documents/pgListings/$(pgId)) &&
+          firestore.get(/databases/(default)/documents/pgListings/$(pgId)).data.ownerId == request.auth.uid
+        )
+      );
+    }
+
+    function isValidImageUpload() {
+      return request.resource != null &&
+        request.resource.size > 0 &&
+        request.resource.size <= 5 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/(jpeg|jpg|png|webp)');
+    }
+
+    // Main PG Photo, Gallery, Facilities, Bathrooms
+    match /pg/{pgId}/{category}/{fileName} {
+      allow read: if category in ['main', 'gallery', 'facilities', 'bathrooms', 'property', 'rooms'];
+      allow create, update: if category in ['main', 'gallery', 'facilities', 'bathrooms', 'property', 'rooms'] &&
+        fileName.size() >= 1 &&
+        fileName.size() <= 180 &&
+        isValidImageUpload() &&
+        (isPgOwner(pgId) || isBootstrappedAdmin());
+      allow delete: if isPgOwner(pgId) || isBootstrappedAdmin();
+    }
+
+    // Room Post Photos: pg/{pgId}/rooms/{roomId}/{fileName}
+    match /pg/{pgId}/rooms/{roomId}/{fileName} {
+      allow read: if true;
+      allow create, update: if roomId.size() >= 1 &&
+        roomId.size() <= 128 &&
+        fileName.size() >= 1 &&
+        fileName.size() <= 180 &&
+        isValidImageUpload() &&
+        (isPgOwner(pgId) || isBootstrappedAdmin());
+      allow delete: if isPgOwner(pgId) || isBootstrappedAdmin();
+    }
+  }
+}

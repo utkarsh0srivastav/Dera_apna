@@ -1,0 +1,6 @@
+{
+  "name": "Dera Apna – Find Your Perfect Stay",
+  "description": "Discover verified PGs and hostels across India with real-time availability, transparent pricing, direct owner inquiries, and interactive location search.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,486 @@
+{
+  "entities": {
+    "Customer": {
+      "title": "Customer",
+      "description": "Public/profile record for a registered customer",
+      "type": "object",
+      "properties": {
+        "customerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "mobile": { "type": "string", "minLength": 10, "maxLength": 15, "pattern": "^[6-9][0-9]{9}$" },
+        "email": { "type": "string", "maxLength": 150 },
+        "gender": { "type": "string", "enum": ["Male", "Female"] },
+        "status": { "type": "string", "enum": ["active", "blocked"] },
+        "language": {
+          "type": "string",
+          "enum": ["en", "hi", "kn", "bho", "ml", "mr", "te", "ta", "as", "ks", "pa", "bgc", "bn", "gu", "or", "ur"]
+        },
+        "theme": { "type": "string", "enum": ["light", "dark"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["customerId", "name", "mobile", "email", "gender", "status", "createdAt", "updatedAt"]
+    },
+    "CustomerSecret": {
+      "title": "CustomerSecret",
+      "description": "Isolated PBKDF2-SHA256 PIN and Security Answer hashes for a customer",
+      "type": "object",
+      "properties": {
+        "customerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "pinHash": { "type": "string", "minLength": 32, "maxLength": 256 },
+        "pinSalt": { "type": "string", "minLength": 16, "maxLength": 128 },
+        "securityQuestion": { "type": "string", "minLength": 5, "maxLength": 200 },
+        "securityAnswerHash": { "type": "string", "minLength": 32, "maxLength": 256 },
+        "securityAnswerSalt": { "type": "string", "minLength": 16, "maxLength": 128 },
+        "failedAttempts": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "customerId",
+        "pinHash",
+        "pinSalt",
+        "securityQuestion",
+        "securityAnswerHash",
+        "securityAnswerSalt",
+        "failedAttempts",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "CustomerMobileIndex": {
+      "title": "CustomerMobileIndex",
+      "description": "Unique index mapping 10-digit customer mobile number to customerId and securityQuestion",
+      "type": "object",
+      "properties": {
+        "mobile": { "type": "string", "minLength": 10, "maxLength": 15, "pattern": "^[6-9][0-9]{9}$" },
+        "customerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "securityQuestion": { "type": "string", "minLength": 5, "maxLength": 200 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["mobile", "customerId", "securityQuestion", "createdAt"]
+    },
+    "CustomerEmailIndex": {
+      "title": "CustomerEmailIndex",
+      "description": "Unique index mapping normalized customer email address to customerId",
+      "type": "object",
+      "properties": {
+        "emailKey": { "type": "string", "minLength": 3, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "minLength": 3, "maxLength": 150 },
+        "customerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["emailKey", "email", "customerId", "createdAt"]
+    },
+    "OwnerPreRegistration": {
+      "title": "OwnerPreRegistration",
+      "description": "Admin pre-registration record binding one mobile number to one approved Google account",
+      "type": "object",
+      "properties": {
+        "mobile": { "type": "string", "minLength": 10, "maxLength": 15, "pattern": "^[6-9][0-9]{9}$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "email": { "type": "string", "minLength": 3, "maxLength": 150 },
+        "approvedGoogleEmail": { "type": "string", "minLength": 3, "maxLength": 150 },
+        "linkedGoogleUid": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "enum": ["Pending", "Approved", "Blocked", "Deleted", "Rejected"] },
+        "createdByAdmin": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["mobile", "name", "email", "approvedGoogleEmail", "status", "createdByAdmin", "createdAt", "updatedAt"]
+    },
+    "Owner": {
+      "title": "Owner",
+      "description": "Verified PG Owner profile bound to approved Google account and mobile",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "mobile": { "type": "string", "minLength": 10, "maxLength": 15, "pattern": "^[6-9][0-9]{9}$" },
+        "email": { "type": "string", "minLength": 3, "maxLength": 150 },
+        "linkedGoogleUid": { "type": "string", "maxLength": 128 },
+        "preRegistrationStatus": { "type": "string", "enum": ["Pending", "Approved", "Blocked", "Deleted", "Rejected"] },
+        "accountStatus": { "type": "string", "enum": ["Pending", "Approved", "Blocked", "Deleted", "Rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "ownerId",
+        "name",
+        "mobile",
+        "email",
+        "linkedGoogleUid",
+        "preRegistrationStatus",
+        "accountStatus",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "OwnerSecret": {
+      "title": "OwnerSecret",
+      "description": "Isolated PBKDF2-SHA256 PIN hash for a PG Owner",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "mobile": { "type": "string", "minLength": 10, "maxLength": 15 },
+        "pinHash": { "type": "string", "minLength": 32, "maxLength": 256 },
+        "pinSalt": { "type": "string", "minLength": 16, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["ownerId", "mobile", "pinHash", "pinSalt", "createdAt", "updatedAt"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Single authorized Admin identity with PBKDF2-SHA256 PIN hash",
+      "type": "object",
+      "properties": {
+        "adminId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "minLength": 3, "maxLength": 150 },
+        "pinHash": { "type": "string", "minLength": 32, "maxLength": 256 },
+        "pinSalt": { "type": "string", "minLength": 16, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["adminId", "email", "pinHash", "pinSalt", "createdAt", "updatedAt"]
+    },
+    "TrustedDeviceSession": {
+      "title": "TrustedDeviceSession",
+      "description": "Trusted device binding allowing PIN login without repeated Google popups until Complete Sign Out",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "role": { "type": "string", "enum": ["CUSTOMER", "PG_OWNER", "ADMIN"] },
+        "mobile": { "type": "string", "maxLength": 20 },
+        "email": { "type": "string", "maxLength": 150 },
+        "deviceId": { "type": "string", "maxLength": 128 },
+        "trusted": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["sessionId", "userId", "role", "mobile", "email", "deviceId", "trusted", "createdAt", "updatedAt"]
+    },
+    "PgListing": {
+      "title": "PgListing",
+      "description": "PG or Hostel property listing with permanent core identity and normalized location hierarchy",
+      "type": "object",
+      "properties": {
+        "pgId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "propertyName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "propertyType": { "type": "string", "enum": ["PG", "Hostel", "Both"] },
+        "gender": { "type": "string", "enum": ["Male", "Female", "Both"] },
+        "stateId": { "type": "string", "maxLength": 64 },
+        "districtId": { "type": "string", "maxLength": 64 },
+        "cityId": { "type": "string", "maxLength": 64 },
+        "areaId": { "type": "string", "maxLength": 64 },
+        "sectorId": { "type": "string", "maxLength": 64 },
+        "street": { "type": "string", "maxLength": 200 },
+        "houseNumber": { "type": "string", "maxLength": 100 },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "mainPhotoUrl": { "type": "string", "maxLength": 800000 },
+        "mainPhotoPath": { "type": "string", "maxLength": 500 },
+        "mainPhotoSize": { "type": "number" },
+        "mainPhotoContentType": { "type": "string", "maxLength": 100 },
+        "mainPhotoUploadedAt": { "type": "string", "maxLength": 80 },
+        "googleReviewUrl": { "type": "string", "maxLength": 500 },
+        "rent": { "type": "number" },
+        "status": { "type": "string", "enum": ["draft", "pending", "active", "inactive", "deleted"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "pgId",
+        "ownerId",
+        "propertyName",
+        "propertyType",
+        "gender",
+        "stateId",
+        "districtId",
+        "cityId",
+        "areaId",
+        "latitude",
+        "longitude",
+        "rent",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Room": {
+      "title": "Room",
+      "description": "Individual room post (2 Seater, 3 Seater, 4 Seater) belonging to a PG listing",
+      "type": "object",
+      "properties": {
+        "roomId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "pgId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "roomType": { "type": "string", "maxLength": 80 },
+        "occupancy": { "type": "string", "enum": ["2 Seater", "3 Seater", "4 Seater"] },
+        "rent": { "type": "number" },
+        "securityDeposit": { "type": "number" },
+        "securityDuration": { "type": "number" },
+        "facilities": { "type": "string", "maxLength": 1500 },
+        "photos": { "type": "string", "maxLength": 3000 },
+        "description": { "type": "string", "maxLength": 1500 },
+        "availability": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["active", "inactive", "deleted"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "roomId",
+        "pgId",
+        "ownerId",
+        "roomType",
+        "occupancy",
+        "rent",
+        "availability",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "Explicit customer inquiry sharing contact details with a PG owner",
+      "type": "object",
+      "properties": {
+        "inquiryId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "customerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "customerMobile": { "type": "string", "maxLength": 15 },
+        "customerEmail": { "type": "string", "maxLength": 150 },
+        "pgId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "pgName": { "type": "string", "maxLength": 120 },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "roomId": { "type": "string", "maxLength": 128 },
+        "roomOccupancy": { "type": "string", "maxLength": 40 },
+        "status": { "type": "string", "enum": ["new", "contacted", "closed"] },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "inquiryId",
+        "customerId",
+        "customerName",
+        "customerMobile",
+        "customerEmail",
+        "pgId",
+        "pgName",
+        "ownerId",
+        "status",
+        "timestamp",
+        "updatedAt"
+      ]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Verified customer review for a PG listing",
+      "type": "object",
+      "properties": {
+        "reviewId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "pgId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "customerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "rating": { "type": "number" },
+        "comment": { "type": "string", "maxLength": 1000 },
+        "status": { "type": "string", "enum": ["published", "hidden", "flagged"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["reviewId", "pgId", "customerId", "customerName", "rating", "comment", "status", "createdAt", "updatedAt"]
+    },
+    "Visit": {
+      "title": "Visit",
+      "description": "Anonymous deduplicated PG view counter record",
+      "type": "object",
+      "properties": {
+        "visitId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "pgId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "sessionId": { "type": "string", "maxLength": 128 },
+        "source": { "type": "string", "maxLength": 64 },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["visitId", "pgId", "ownerId", "sessionId", "source", "timestamp"]
+    },
+    "Advertisement": {
+      "title": "Advertisement",
+      "description": "Admin-configured sponsored PG placement scoped to City and Area/Sector",
+      "type": "object",
+      "properties": {
+        "advertisementId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "pgId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "cityId": { "type": "string", "maxLength": 64 },
+        "areaId": { "type": "string", "maxLength": 64 },
+        "sectorId": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["draft", "active", "expired", "cancelled"] },
+        "startDate": { "type": "string", "maxLength": 40 },
+        "endDate": { "type": "string", "maxLength": 40 },
+        "createdByAdmin": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "advertisementId",
+        "pgId",
+        "cityId",
+        "areaId",
+        "sectorId",
+        "status",
+        "startDate",
+        "endDate",
+        "createdByAdmin",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "LocationNode": {
+      "title": "LocationNode",
+      "description": "Authoritative India administrative location hierarchy node",
+      "type": "object",
+      "properties": {
+        "locationId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "level": { "type": "string", "enum": ["state", "district", "city", "area"] },
+        "parentId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 120 },
+        "hasSectors": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["locationId", "level", "parentId", "name", "hasSectors", "createdAt"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Immutable Admin action audit log",
+      "type": "object",
+      "properties": {
+        "logId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "adminUid": { "type": "string", "maxLength": 128 },
+        "action": { "type": "string", "maxLength": 100 },
+        "targetType": { "type": "string", "maxLength": 64 },
+        "targetId": { "type": "string", "maxLength": 128 },
+        "metadata": { "type": "string", "maxLength": 1000 },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["logId", "adminUid", "action", "targetType", "targetId", "metadata", "timestamp"]
+    },
+    "DeviceLoginRequest": {
+      "title": "DeviceLoginRequest",
+      "description": "New-device login approval request for PG Owner single active trusted device security",
+      "type": "object",
+      "properties": {
+        "requestId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "userId": { "type": "string", "maxLength": 128 },
+        "ownerId": { "type": "string", "maxLength": 128 },
+        "ownerName": { "type": "string", "maxLength": 100 },
+        "mobile": { "type": "string", "maxLength": 15 },
+        "email": { "type": "string", "maxLength": 150 },
+        "deviceIdHash": { "type": "string", "maxLength": 128 },
+        "deviceName": { "type": "string", "maxLength": 120 },
+        "platform": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED", "EXPIRED", "CANCELLED"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["requestId", "userId", "ownerId", "ownerName", "mobile", "email", "deviceIdHash", "deviceName", "platform", "status", "createdAt", "updatedAt"]
+    },
+    "PgPhoto": {
+      "title": "PgPhoto",
+      "description": "Compressed and validated PG photo asset with owner-scoped metadata",
+      "type": "object",
+      "properties": {
+        "photoId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "pgId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "category": { "type": "string", "enum": ["main", "gallery", "rooms", "facilities", "bathrooms"] },
+        "storagePath": { "type": "string", "maxLength": 300 },
+        "contentType": { "type": "string", "maxLength": 64 },
+        "sizeBytes": { "type": "number" },
+        "dataUrl": { "type": "string", "maxLength": 800000 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["photoId", "pgId", "ownerId", "category", "storagePath", "contentType", "sizeBytes", "dataUrl", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/pgPhotos/{photoId}": {
+      "schema": { "$ref": "#/entities/PgPhoto" },
+      "description": "Compressed and validated PG photo assets"
+    },
+    "/deviceLoginRequests/{requestId}": {
+      "schema": { "$ref": "#/entities/DeviceLoginRequest" },
+      "description": "New-device re-login approval requests for PG Owners"
+    },
+    "/customers/{customerId}": {
+      "schema": { "$ref": "#/entities/Customer" },
+      "description": "Registered customer profiles"
+    },
+    "/customerSecrets/{customerId}": {
+      "schema": { "$ref": "#/entities/CustomerSecret" },
+      "description": "Isolated hashed PIN and security answer secrets for customers"
+    },
+    "/customerMobileIndex/{mobile}": {
+      "schema": { "$ref": "#/entities/CustomerMobileIndex" },
+      "description": "Mobile number lookup index for customers"
+    },
+    "/customerEmailIndex/{emailKey}": {
+      "schema": { "$ref": "#/entities/CustomerEmailIndex" },
+      "description": "Email address lookup index for customers"
+    },
+    "/ownerPreRegistrations/{mobile}": {
+      "schema": { "$ref": "#/entities/OwnerPreRegistration" },
+      "description": "Admin pre-registered PG owner mobile numbers and approved Google emails"
+    },
+    "/owners/{ownerId}": {
+      "schema": { "$ref": "#/entities/Owner" },
+      "description": "Verified PG owner profiles"
+    },
+    "/ownerSecrets/{ownerId}": {
+      "schema": { "$ref": "#/entities/OwnerSecret" },
+      "description": "Isolated hashed PIN secrets for PG owners"
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/Admin" },
+      "description": "Single authorized Admin record"
+    },
+    "/trustedDeviceSessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/TrustedDeviceSession" },
+      "description": "Trusted device sessions for PIN login without repeated Google popups"
+    },
+    "/pgListings/{pgId}": {
+      "schema": { "$ref": "#/entities/PgListing" },
+      "description": "PG and Hostel listings"
+    },
+    "/rooms/{roomId}": {
+      "schema": { "$ref": "#/entities/Room" },
+      "description": "Individual room posts (2 Seater, 3 Seater, 4 Seater) for PG listings"
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/Inquiry" },
+      "description": "Customer inquiries sent to PG owners"
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Customer reviews for PG listings"
+    },
+    "/visits/{visitId}": {
+      "schema": { "$ref": "#/entities/Visit" },
+      "description": "Anonymous deduplicated PG visit records"
+    },
+    "/advertisements/{advertisementId}": {
+      "schema": { "$ref": "#/entities/Advertisement" },
+      "description": "Sponsored PG advertisements"
+    },
+    "/locations/{locationId}": {
+      "schema": { "$ref": "#/entities/LocationNode" },
+      "description": "Official India administrative hierarchy nodes"
+    },
+    "/auditLogs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Immutable administrative audit logs"
+    }
+  }
+}

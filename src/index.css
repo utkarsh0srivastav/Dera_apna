@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --bg-primary: #FAF8F5;
+    --bg-surface: #FFFFFF;
+    --bg-elevated: #F5F2EB;
+    --border-subtle: #E2E8F0;
+    --text-primary: #0F2942;
+    --text-secondary: #475569;
+    --accent-primary: #0284C7;
+    --accent-hover: #0369A1;
+    --accent-secondary: #0EA5E9;
+  }
+
+  .dark {
+    /* Section 5: DARK MODE MUST NOT USE NAVY AS THE MAIN BACKGROUND.
+       Main background: Deep Maroon / Burgundy
+       Secondary surfaces: Dark Brown
+       Cards: Dark Brown / slightly lighter brown
+       Primary accent: Red
+       Secondary accent: Warm light brown
+       Text: White / warm off-white */
+    --bg-primary: #230B0E;
+    --bg-surface: #331618;
+    --bg-elevated: #3F1D20;
+    --border-subtle: #592B2E;
+    --text-primary: #FAF5F0;
+    --text-secondary: #E6CCB2;
+    --accent-primary: #DC2626;
+    --accent-hover: #B91C1C;
+    --accent-secondary: #D4A373;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, .font-display {
+    font-family: 'Instrument Serif', Georgia, serif;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Override dark mode utility backgrounds so Dark Mode uses Maroon / Dark Brown / Red instead of slate/navy */
+.dark .dark\:bg-slate-950 {
+  background-color: #230B0E !important;
+}
+.dark .dark\:bg-slate-900,
+.dark .dark\:bg-slate-900\/95 {
+  background-color: #331618 !important;
+}
+.dark .dark\:bg-slate-800,
+.dark .dark\:bg-slate-800\/70,
+.dark .dark\:bg-slate-800\/50 {
+  background-color: #3F1D20 !important;
+}
+.dark .dark\:border-slate-800,
+.dark .dark\:border-slate-700 {
+  border-color: #592B2E !important;
+}
+.dark .dark\:text-slate-300,
+.dark .dark\:text-slate-400 {
+  color: #E6CCB2 !important;
+}
+.dark .dark\:text-sky-400 {
+  color: #F87171 !important;
+}
+.dark .bg-sky-600 {
+  background-color: #DC2626 !important;
+}
+.dark .hover\:bg-sky-700:hover {
+  background-color: #B91C1C !important;
+}
+.dark .text-sky-600 {
+  color: #F87171 !important;
+}
+.dark .border-sky-600,
+.dark .dark\:border-sky-500 {
+  border-color: #DC2626 !important;
+}
+.dark .bg-sky-50,
+.dark .bg-sky-50\/70 {
+  background-color: #3F1D20 !important;
+}
+.dark .border-sky-200 {
+  border-color: #592B2E !important;
+}
+.dark .dark\:bg-sky-500 {
+  background-color: #DC2626 !important;
+  color: #FAF5F0 !important;
+}
